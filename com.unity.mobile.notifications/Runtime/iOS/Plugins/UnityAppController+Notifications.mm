@@ -46,6 +46,20 @@
              [UnityNotificationManager sharedInstance].lastReceivedNotification = NULL;
          }];
 
+
+        // Ivan: this is a fix for probllem when iOSNotificationCenter.GetLastRespondedNotification()
+        // returns null if application was cold started from push notification.
+        // The problem actually in Firebase Cloud Messaging  - it overwrites UNUserNotificationCenter.delegate
+        // with own value
+        // https://github.com/firebase/firebase-unity-sdk/issues/377#issuecomment-1165818349
+        [nc addObserverForName: UIApplicationDidFinishLaunchingNotification
+         object: nil
+         queue: [NSOperationQueue mainQueue]
+         usingBlock:^(NSNotification *notification) {
+            [UNUserNotificationCenter currentNotificationCenter].delegate = [UnityNotificationManager sharedInstance];
+         }];
+        // Ivan
+		
         [nc addObserverForName: kUnityWillFinishLaunchingWithOptions
          object: nil
          queue: [NSOperationQueue mainQueue]
